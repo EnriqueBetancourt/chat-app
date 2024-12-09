@@ -1,0 +1,15 @@
+# Ignorar node_modules
+node_modules/
+
+# Ignorar archivos de logs
+*.log
+
+# Ignorar archivos de sistema y editor
+.DS_Store
+Thumbs.db
+
+# Ignorar la carpeta de producción (si la tienes)
+dist/
+
+# Ignorar archivos de dependencias de VS Code (si usas VS Code)
+.vscode/
