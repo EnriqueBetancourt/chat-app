@@ -108,14 +108,16 @@ io.on('connection', (socket) => {
         db.query(query, [username, data.message], (err) => {
             if (err) {
                 console.error('Error al guardar mensaje:', err);
+                socket.emit('serverError', { message: 'Servidor no disponible, intentando otro servidor' });
                 return;
             }
             console.log('Mensaje guardado en la base de datos');
         });
-
+    
         io.emit('receiveMessage', { message: data.message, username: username });
         console.log('usuario: ' + username + ' mensaje: ' + data.message);
     });
+    
 
     // Desconexión del cliente
     socket.on('disconnect', () => {
@@ -124,6 +126,18 @@ io.on('connection', (socket) => {
         io.emit('updateUsers', users); // Emitir la lista de usuarios actualizada
     });
 });
+
+// Función para enviar el mensaje al servidor disponible
+async function sendMessageToServer(url, username, message, socket) {
+    try {
+        await axios.post(`${url}/sendMessage`, { username, message });
+        console.log('Mensaje enviado al servidor');
+        socket.emit('receiveMessage', { message, username });
+    } catch (err) {
+        console.error('Error al enviar mensaje al servidor:', err);
+        socket.emit('serverError', { message: 'Error al enviar mensaje al servidor' });
+    }
+}
 
 // Iniciar el servidor
 server.listen(3000, () => {
