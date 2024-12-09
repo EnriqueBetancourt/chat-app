@@ -63,39 +63,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Usar las rutas del archivo api.js
 app.use('/', apiRoutes);
 
-// Lista de servidores (ajusta las IPs y puertos según tus necesidades)
-const SERVERS = [
-    { host: '192.168.1.10', port: 3000 }, // Primer servidor
-    { host: '192.168.1.11', port: 3000 }  // Segundo servidor
-];
-
-let activeServerIndex = 0;
-
-// Middleware para redirigir tráfico al servidor activo
-app.use(async (req, res, next) => {
-    let serverAvailable = false;
-
-    // Intenta encontrar un servidor disponible
-    for (let i = 0; i < SERVERS.length; i++) {
-        const server = SERVERS[(activeServerIndex + i) % SERVERS.length];
-        const url = `http://${server.host}:${server.port}${req.originalUrl}`;
-        try {
-            // Verifica si el servidor está activo
-            await axios.head(url, { timeout: 1000 });
-            activeServerIndex = (activeServerIndex + i) % SERVERS.length;
-            serverAvailable = true;
-            res.redirect(307, url); // Redirige al servidor disponible
-            return;
-        } catch (err) {
-            console.log(`Servidor ${server.host}:${server.port} no disponible.`);
-        }
-    }
-
-    if (!serverAvailable) {
-        res.status(503).send('Todos los servidores están inactivos.');
-    }
-});
-
 // Ruta para la vista del chat
 app.get('/chat', (req, res) => {
     if (!req.session.username) {
